@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CareerReady AI – Student Platform</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #6c63ff;
+      --primary-dark: #574fd6;
+      --accent: #ff6584;
+      --green: #22c55e;
+      --yellow: #f59e0b;
+      --red: #ef4444;
+      --bg: #f0f2ff;
+      --card: #ffffff;
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --sidebar-w: 240px;
+    }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ===== ONBOARDING ===== */
+    #onboarding {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .ob-card {
+      background: #fff; border-radius: 24px; padding: 40px; width: 100%; max-width: 520px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2); position: relative;
+    }
+    .ob-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .ob-logo .icon { width: 40px; height: 40px; background: var(--primary); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; }
+    .ob-logo span { font-size: 20px; font-weight: 700; color: var(--primary); }
+    .progress-bar { display: flex; gap: 6px; margin-bottom: 28px; }
+    .progress-bar .step { flex: 1; height: 5px; border-radius: 99px; background: #e5e7eb; transition: background .3s; }
+    .progress-bar .step.active { background: var(--primary); }
+    .ob-title { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .ob-sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text); }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 11px 14px; border: 2px solid var(--border); border-radius: 10px;
+      font-size: 14px; outline: none; transition: border-color .2s; font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn { width: 100%; padding: 13px; background: var(--primary); color: #fff; border: none;
+      border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .btn:hover { background: var(--primary-dark); }
+    .btn-sec { background: #f3f4f6; color: var(--text); }
+    .btn-sec:hover { background: #e5e7eb; }
+    .btn-row { display: flex; gap: 10px; margin-top: 8px; }
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 7px 14px; border: 2px solid var(--border); border-radius: 99px; font-size: 13px;
+      cursor: pointer; transition: all .2s; user-select: none; }
+    .chip.selected { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .skill-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .skill-row span { width: 110px; font-size: 13px; font-weight: 500; flex-shrink: 0; }
+    .skill-slider { flex: 1; accent-color: var(--primary); }
+    .skill-val { width: 30px; font-size: 13px; color: var(--muted); text-align: right; }
+    .company-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+      border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all .2s; margin-bottom: 8px; }
+    .company-card:hover, .company-card.selected { border-color: var(--primary); background: #f5f3ff; }
+    .company-card .logo { width: 38px; height: 38px; border-radius: 8px; display: flex;
+      align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; }
+    .company-card h4 { font-size: 14px; font-weight: 600; }
+    .company-card p { font-size: 12px; color: var(--muted); }
+    .ob-hidden { display: none !important; }
+
+    /* ===== MAIN APP ===== */
+    #app { display: none; min-height: 100vh; }
+    .sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-w);
+      background: #1e1b4b; color: #fff; display: flex; flex-direction: column;
+      padding: 24px 0; z-index: 100;
+    }
+    .sidebar-logo { display: flex; align-items: center; gap: 10px; padding: 0 20px 24px; border-bottom: 1px solid #2d2a5e; }
+    .sidebar-logo .icon { width: 36px; height: 36px; background: var(--primary); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .sidebar-logo span { font-size: 16px; font-weight: 700; color: #fff; }
+    .nav-section { padding: 16px 12px 4px; }
+    .nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #8b87c0; padding: 0 8px; margin-bottom: 4px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+      cursor: pointer; font-size: 14px; font-weight: 500; color: #c4c3de; transition: all .2s; margin-bottom: 2px; }
+    .nav-item:hover { background: #2d2a5e; color: #fff; }
+    .nav-item.active { background: var(--primary); color: #fff; }
+    .nav-item .ni { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 12px; border-top: 1px solid #2d2a5e; }
+    .student-info { display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+      display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; color: #fff; flex-shrink: 0; }
+    .student-info .name { font-size: 13px; font-weight: 600; color: #fff; }
+    .student-info .role { font-size: 11px; color: #8b87c0; }
+
+    .main { margin-left: var(--sidebar-w); padding: 28px; min-height: 100vh; }
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 24px; font-weight: 700; }
+    .page-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+    /* ===== CARDS ===== */
+    .card { background: var(--card); border-radius: 16px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .stat-card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .stat-card .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 8px; }
+    .stat-card .value { font-size: 32px; font-weight: 800; }
+    .stat-card .sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .badge { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: #dcfce7; color: #16a34a; }
+    .badge-yellow { background: #fef9c3; color: #ca8a04; }
+    .badge-red { background: #fee2e2; color: #dc2626; }
+    .badge-blue { background: #dbeafe; color: #2563eb; }
+    .badge-purple { background: #ede9fe; color: #7c3aed; }
+
+    /* ===== READINESS SCORE ===== */
+    .score-ring-wrap { display: flex; align-items: center; gap: 32px; }
+    .ring-container { position: relative; width: 160px; height: 160px; flex-shrink: 0; }
+    svg.ring { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: #e5e7eb; stroke-width: 14; }
+    .ring-fill { fill: none; stroke: var(--primary); stroke-width: 14; stroke-linecap: round;
+      stroke-dasharray: 440; stroke-dashoffset: 132; transition: stroke-dashoffset 1.5s ease; }
+    .ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .ring-text .pct { font-size: 36px; font-weight: 800; color: var(--primary); }
+    .ring-text .lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .score-breakdown { flex: 1; }
+    .score-item { margin-bottom: 14px; }
+    .score-item .s-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+    .bar-track { height: 8px; background: #e5e7eb; border-radius: 99px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+    /* ===== DAILY PLAN ===== */
+    .plan-day { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+    .day-card { background: var(--card); border-radius: 12px; padding: 14px 10px; text-align: center;
+      cursor: pointer; border: 2px solid var(--border); transition: all .2s; }
+    .day-card.today { border-color: var(--primary); background: #f5f3ff; }
+    .day-card .d-name { font-size: 12px; font-weight: 600; color: var(--muted); }
+    .day-card .d-date { font-size: 18px; font-weight: 700; margin: 4px 0; }
+    .day-card .d-tasks { font-size: 11px; color: var(--muted); }
+    .task-list { display: flex; flex-direction: column; gap: 10px; }
+    .task-item { display: flex; align-items: center; gap: 12px; background: var(--card); border-radius: 12px;
+      padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.05); cursor: pointer; transition: transform .15s; }
+    .task-item:hover { transform: translateX(4px); }
+    .task-item .chk { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px;
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all .2s; }
+    .task-item.done .chk { background: var(--green); border-color: var(--green); color: #fff; }
+    .task-item.done .t-title { text-decoration: line-through; color: var(--muted); }
+    .task-item .t-info { flex: 1; }
+    .task-item .t-title { font-size: 14px; font-weight: 600; }
+    .task-item .t-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .task-item .t-time { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+    /* ===== AI CHAT ===== */
+    .chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 160px); max-height: 680px; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px;
+      background: #f8f7ff; border-radius: 12px 12px 0 0; border: 1px solid var(--border); border-bottom: none; }
+    .msg { display: flex; gap: 10px; max-width: 80%; }
+    .msg.bot { align-self: flex-start; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg .av { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex;
+      align-items: center; justify-content: center; font-size: 16px; }
+    .msg.bot .av { background: var(--primary); }
+    .msg.user .av { background: var(--accent); }
+    .bubble { padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; }
+    .msg.bot .bubble { background: #fff; border: 1px solid var(--border); border-radius: 4px 16px 16px 16px; }
+    .msg.user .bubble { background: var(--primary); color: #fff; border-radius: 16px 4px 16px 16px; }
+    .chat-input-row { display: flex; gap: 8px; padding: 12px; background: #fff;
+      border: 1px solid var(--border); border-radius: 0 0 12px 12px; }
+    .chat-input-row input { flex: 1; padding: 10px 14px; border: 2px solid var(--border); border-radius: 10px;
+      font-size: 14px; outline: none; font-family: inherit; }
+    .chat-input-row input:focus { border-color: var(--primary); }
+    .chat-input-row button { padding: 10px 18px; background: var(--primary); color: #fff; border: none;
+      border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .quick-chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 8px 0; }
+    .qchip { padding: 6px 14px; background: #ede9fe; color: var(--primary); border-radius: 99px;
+      font-size: 12px; font-weight: 500; cursor: pointer; border: none; transition: background .2s; }
+    .qchip:hover { background: #ddd6fe; }
+    .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+    .typing span { width: 8px; height: 8px; background: var(--muted); border-radius: 50%; animation: bounce .8s infinite; }
+    .typing span:nth-child(2) { animation-delay: .15s; }
+    .typing span:nth-child(3) { animation-delay: .3s; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)} }
+
+    /* ===== SKILLS ASSESSMENT PAGE ===== */
+    .skill-cat { margin-bottom: 24px; }
+    .skill-cat h3 { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .skill-box { background: var(--card); border-radius: 12px; padding: 14px 16px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+    .skill-box .sk-name { font-size: 13px; font-weight: 600; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .skill-box .sk-level { font-size: 12px; color: var(--muted); }
+    .skill-box .bar-track { margin-top: 6px; }
+
+    /* ===== TARGET COMPANY PAGE ===== */
+    .company-detail { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+    .co-list { display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; }
+    .co-card { background: var(--card); border-radius: 12px; padding: 14px 16px; cursor: pointer;
+      border: 2px solid var(--border); transition: all .2s; display: flex; align-items: center; gap: 12px; }
+    .co-card.active { border-color: var(--primary); background: #f5f3ff; }
+    .co-card .clogo { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 20px; color: #fff; font-weight: 700; flex-shrink: 0; }
+    .co-card h4 { font-size: 14px; font-weight: 600; }
+    .co-card p { font-size: 12px; color: var(--muted); }
+    .co-detail-card { background: var(--card); border-radius: 16px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .co-header { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .co-header .big-logo { width: 64px; height: 64px; border-radius: 14px; display: flex;
+      align-items: center; justify-content: center; font-size: 30px; color: #fff; font-weight: 700; }
+    .co-header h2 { font-size: 22px; font-weight: 700; }
+    .co-header p { color: var(--muted); font-size: 14px; }
+    .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+    .info-box { background: #f8f7ff; border-radius: 10px; padding: 12px 14px; }
+    .info-box .ib-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+    .info-box .ib-val { font-size: 14px; font-weight: 700; margin-top: 2px; }
+    .req-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .req-list li { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    .req-list li::before { content: '✓'; color: var(--green); font-weight: 700; }
+    .match-bar { margin-top: 16px; }
+    .match-bar .mb-label { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+
+    /* ===== DASHBOARD ===== */
+    .welcome-band { background: linear-gradient(135deg, #6c63ff, #764ba2); color: #fff; border-radius: 16px;
+      padding: 24px 28px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
+    .welcome-band h2 { font-size: 22px; font-weight: 700; }
+    .welcome-band p { font-size: 14px; opacity: .85; margin-top: 4px; }
+    .welcome-band .emoji { font-size: 56px; }
+    .activity-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .activity-item:last-child { border-bottom: none; }
+    .ai-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .activity-item .a-text { font-size: 13px; flex: 1; }
+    .activity-item .a-time { font-size: 12px; color: var(--muted); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; }
+      .sidebar-logo span, .nav-item span, .student-info .name, .student-info .role, .nav-label { display: none; }
+      .main { margin-left: 60px; padding: 16px; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .company-detail { grid-template-columns: 1fr; }
+      .skill-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ===== MISC ===== */
+    .section-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+    .section-title a { font-size: 13px; font-weight: 500; color: var(--primary); text-decoration: none; }
+    .mt-16 { margin-top: 16px; }
+    .mt-20 { margin-top: 20px; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #c4c3de; border-radius: 99px; }
+
+    /* ===== QUIZ ===== */
+    .quiz-header-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+    .quiz-score-bar { display:flex; gap:12px; flex-wrap:wrap; }
+    .qs-box { padding:10px 18px; border-radius:12px; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; }
+    .qs-total  { background:#ede9fe; color:#7c3aed; }
+    .qs-right  { background:#dcfce7; color:#16a34a; }
+    .qs-wrong  { background:#fee2e2; color:#dc2626; }
+    .qs-score  { background:linear-gradient(135deg,#6c63ff,#764ba2); color:#fff; }
+    .quiz-card { background:var(--card); border-radius:16px; padding:22px; box-shadow:0 2px 12px rgba(0,0,0,.06); margin-bottom:16px; position:relative; }
+    .quiz-card .q-num { font-size:11px; font-weight:700; color:var(--primary); text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px; }
+    .quiz-card .q-text { font-size:15px; font-weight:600; margin-bottom:16px; line-height:1.5; }
+    .options-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .opt-btn { display:flex; align-items:center; gap:10px; padding:11px 14px; border:2px solid var(--border); border-radius:10px; background:#fff; cursor:pointer; font-size:14px; font-weight:500; transition:all .2s; text-align:left; font-family:inherit; }
+    .opt-btn .opt-letter { width:26px; height:26px; border-radius:8px; background:#f3f4f6; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+    .opt-btn:hover:not(:disabled) { border-color:var(--primary); background:#f5f3ff; }
+    .opt-btn.selected { border-color:var(--primary); background:#ede9fe; }
+    .opt-btn.correct { border-color:var(--green); background:#dcfce7; }
+    .opt-btn.correct .opt-letter { background:var(--green); color:#fff; }
+    .opt-btn.wrong { border-color:var(--red); background:#fee2e2; }
+    .opt-btn.wrong .opt-letter { background:var(--red); color:#fff; }
+    .opt-btn:disabled { cursor:default; }
+    .q-feedback { margin-top:12px; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:500; display:none; }
+    .q-feedback.show { display:block; }
+    .q-feedback.correct-fb { background:#dcfce7; color:#16a34a; }
+    .q-feedback.wrong-fb { background:#fee2e2; color:#dc2626; }
+    .remove-q-btn { position:absolute; top:14px; right:14px; background:#fee2e2; color:#dc2626; border:none; border-radius:8px; padding:5px 10px; font-size:12px; font-weight:600; cursor:pointer; }
+    .remove-q-btn:hover { background:#fecaca; }
+    .add-q-panel { background:var(--card); border-radius:16px; padding:22px; box-shadow:0 2px 12px rgba(0,0,0,.06); border:2px dashed var(--border); }
+    .add-q-panel h3 { font-size:15px; font-weight:700; margin-bottom:16px; }
+    .opt-inputs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
+    .opt-inp-wrap { display:flex; align-items:center; gap:8px; }
+    .opt-inp-wrap .opt-lbl { width:28px; height:28px; border-radius:8px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; flex-shrink:0; }
+    .opt-inp-wrap input { flex:1; padding:9px 12px; border:2px solid var(--border); border-radius:8px; font-size:13px; outline:none; font-family:inherit; }
+    .opt-inp-wrap input:focus { border-color:var(--primary); }
+    .quiz-result-card { background:linear-gradient(135deg,#6c63ff,#764ba2); color:#fff; border-radius:20px; padding:32px; text-align:center; margin-bottom:20px; }
+    .quiz-result-card .big-score { font-size:64px; font-weight:800; }
+    .quiz-result-card .result-label { font-size:18px; font-weight:600; opacity:.9; margin-top:4px; }
+    .quiz-result-card .result-sub { font-size:14px; opacity:.75; margin-top:8px; }
+    .result-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px; }
+    .r-stat { background:rgba(255,255,255,.15); border-radius:12px; padding:14px; }
+    .r-stat .rv { font-size:28px; font-weight:800; }
+    .r-stat .rl { font-size:12px; opacity:.8; margin-top:2px; }
+    .quiz-tabs { display:flex; gap:8px; margin-bottom:20px; }
+    .qtab { padding:8px 18px; border-radius:99px; font-size:13px; font-weight:600; cursor:pointer; border:2px solid var(--border); background:#fff; transition:all .2s; }
+    .qtab.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+  </style>
+</head>
+<body>
+
+<!-- ==============================
+     ONBOARDING
+     ============================== -->
+<div id="onboarding">
+  <div class="ob-card">
+    <div class="ob-logo">
+      <div class="icon">🚀</div>
+      <span>CareerReady AI</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-bar">
+      <div class="step active" id="pb1"></div>
+      <div class="step" id="pb2"></div>
+      <div class="step" id="pb3"></div>
+    </div>
+
+    <!-- Step 1: Student Info -->
+    <div id="step1">
+      <div class="ob-title">Welcome! Let's get started 👋</div>
+      <div class="ob-sub">Tell us about yourself so we can personalise your journey</div>
+      <div class="form-row">
+        <div class="form-group"><label>First Name</label><input id="fname" placeholder="Arjun" /></div>
+        <div class="form-group"><label>Last Name</label><input id="lname" placeholder="Sharma" /></div>
+      </div>
+      <div class="form-group"><label>Email Address</label><input id="email" type="email" placeholder="arjun@college.edu" /></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Branch / Stream</label>
+          <select id="branch">
+            <option value="">Select branch</option>
+            <option>Computer Science</option>
+            <option>Information Technology</option>
+            <option>Electronics & Communication</option>
+            <option>Mechanical Engineering</option>
+            <option>Civil Engineering</option>
+            <option>MBA / Management</option>
+            <option>BCA / MCA</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Year of Study</label>
+          <select id="year">
+            <option value="">Select year</option>
+            <option>1st Year</option>
+            <option>2nd Year</option>
+            <option>3rd Year</option>
+            <option>Final Year</option>
+            <option>Postgraduate</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>CGPA / Percentage</label>
+        <input id="cgpa" placeholder="e.g. 8.2 CGPA or 75%" />
+      </div>
+      <div class="form-group">
+        <label>What is your goal?</label>
+        <select id="goal">
+          <option>Get a Software Engineering job</option>
+          <option>Get into top product company</option>
+          <option>Crack a startup role</option>
+          <option>Placement in core engineering</option>
+          <option>Higher studies (MS/MBA)</option>
+        </select>
+      </div>
+      <button class="btn" onclick="goStep(2)">Continue →</button>
+    </div>
+
+    <!-- Step 2: Target Company -->
+    <div id="step2" class="ob-hidden">
+      <div class="ob-title">Choose your dream companies 🎯</div>
+      <div class="ob-sub">Select the companies you want to get placed in</div>
+      <div id="company-list">
+        <div class="company-card" onclick="toggleCompany(this,'Google','🔵','#4285f4')">
+          <div class="logo" style="background:#4285f4">G</div>
+          <div><h4>Google</h4><p>Software Engineer · ₹40–80 LPA</p></div>
+        </div>
+        <div class="company-card" onclick="toggleCompany(this,'Microsoft','🟦','#00a4ef')">
+          <div class="logo" style="background:#00a4ef">M</div>
+          <div><h4>Microsoft</h4><p>Software Engineer · ₹30–60 LPA</p></div>
+        </div>
+        <div class="company-card" onclick="toggleCompany(this,'Amazon','🟠','#ff9900')">
+          <div class="logo" style="background:#ff9900">A</div>
+          <div><h4>Amazon</h4><p>SDE · ₹25–55 LPA</p></div>
+        </div>
+        <div class="company-card" onclick="toggleCompany(this,'Infosys','🟣','#7b2d8b')">
+          <div class="logo" style="background:#7b2d8b">I</div>
+          <div><h4>Infosys</h4><p>System Engineer · ₹3.6–6 LPA</p></div>
+        </div>
+        <div class="company-card" onclick="toggleCompany(this,'TCS','🔵','#0052cc')">
+          <div class="logo" style="background:#0052cc">T</div>
+          <div><h4>TCS</h4><p>Analyst · ₹3.5–7 LPA</p></div>
+        </div>
+        <div class="company-card" onclick="toggleCompany(this,'Flipkart','🟡','#f7a700')">
+          <div class="logo" style="background:#f7a700">F</div>
+          <div><h4>Flipkart</h4><p>SDE · ₹20–45 LPA</p></div>
+        </div>
+      </div>
+      <div class="btn-row mt-16">
+        <button class="btn btn-sec" onclick="goStep(1)">← Back</button>
+        <button class="btn" onclick="goStep(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Skills Assessment -->
+    <div id="step3" class="ob-hidden">
+      <div class="ob-title">Rate your skills 📊</div>
+      <div class="ob-sub">Be honest — we'll build a personalised plan for you</div>
+      <div class="skill-row"><span>Data Structures</span><input class="skill-slider" type="range" min="0" max="10" value="5" oninput="this.nextSibling.textContent=this.value"><span class="skill-val">5</span></div>
+      <div class="skill-row"><span>Algorithms</span><input class="skill-slider" type="range" min="0" max="10" value="4" oninput="this.nextSibling.textContent=this.value"><span class="skill-val">4</span></div>
+      <div class="skill-row"><span>System Design</span><input class="skill-slider" type="range" min="0" max="10" value="3" oninput="this.nextSibling.textContent=this.value"><span class="skill-val">3</span></div>
+      <div class="skill-row"><span>SQL / Database</span><input class="skill-slider" type="range" min="0" max="10" value="6" oninput="this.nextSibling.textContent=this.value"><span class="skill-val">6</span></div>
+      <div class="skill-row"><span>OOPs / SOLID</span><input class="skill-slider" type="range" min="0" max="10" value="5" oninput="this.nextSibling.textContent=this.value"><span class="skill-val">5</span></div>
+      <div class="skill-row"><span>Communication</span><input class="skill-slider" type="range" min="0" max="10" value="7" oninput="this.nextSibling.textContent=this.value"><span class="skill-val">7</span></div>
+      <div class="form-group mt-16">
+        <label>Programming Languages you know</label>
+        <div class="chip-grid">
+          <div class="chip selected" onclick="this.classList.toggle('selected')">Python</div>
+          <div class="chip" onclick="this.classList.toggle('selected')">Java</div>
+          <div class="chip" onclick="this.classList.toggle('selected')">C++</div>
+          <div class="chip selected" onclick="this.classList.toggle('selected')">JavaScript</div>
+          <div class="chip" onclick="this.classList.toggle('selected')">Go</div>
+          <div class="chip" onclick="this.classList.toggle('selected')">Rust</div>
+          <div class="chip" onclick="this.classList.toggle('selected')">SQL</div>
+        </div>
+      </div>
+      <div class="btn-row mt-16">
+        <button class="btn btn-sec" onclick="goStep(2)">← Back</button>
+        <button class="btn" onclick="launchApp()">🚀 Launch Dashboard</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==============================
+     MAIN APP
+     ============================== -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">🚀</div>
+      <span>CareerReady AI</span>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Main</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="ni">🏠</span><span>Dashboard</span></div>
+      <div class="nav-item" onclick="showPage('readiness',this)"><span class="ni">🎯</span><span>Readiness Score</span></div>
+      <div class="nav-item" onclick="showPage('plan',this)"><span class="ni">📅</span><span>Daily Plan</span></div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Growth</div>
+      <div class="nav-item" onclick="showPage('skills',this)"><span class="ni">⚡</span><span>Skills Assessment</span></div>
+      <div class="nav-item" onclick="showPage('companies',this)"><span class="ni">🏢</span><span>Target Companies</span></div>
+      <div class="nav-item" onclick="showPage('chat',this)"><span class="ni">🤖</span><span>AI Career Coach</span></div>
+      <div class="nav-item" onclick="showPage('quiz',this)"><span class="ni">📝</span><span>Quiz & Test</span></div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="student-info">
+        <div class="avatar" id="sidebar-avatar">AS</div>
+        <div>
+          <div class="name" id="sidebar-name">Arjun Sharma</div>
+          <div class="role" id="sidebar-role">CSE · Final Year</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+
+    <!-- ===== DASHBOARD PAGE ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="welcome-band">
+        <div>
+          <h2 id="welcome-name">Good morning, Arjun! 👋</h2>
+          <p>You have <strong>5 tasks</strong> pending today. Keep going!</p>
+        </div>
+        <div class="emoji">🎓</div>
+      </div>
+
+      <div class="grid-3">
+        <div class="stat-card">
+          <div class="label">Readiness Score</div>
+          <div class="value" style="color:var(--primary)">72%</div>
+          <div class="sub">↑ 5% from last week</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Tasks Completed</div>
+          <div class="value" style="color:var(--green)">18/25</div>
+          <div class="sub">This week</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Days to Placement</div>
+          <div class="value" style="color:var(--yellow)">42</div>
+          <div class="sub">Stay consistent!</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-title">Today's Tasks <a href="#" onclick="showPage('plan',document.querySelector('.nav-item:nth-child(3)'))">View All →</a></div>
+          <div class="task-list">
+            <div class="task-item done" onclick="toggleTask(this)">
+              <div class="chk">✓</div>
+              <div class="t-info"><div class="t-title">Solve 2 LeetCode Medium</div><div class="t-meta">Arrays & Hashing · 45 mins</div></div>
+            </div>
+            <div class="task-item done" onclick="toggleTask(this)">
+              <div class="chk">✓</div>
+              <div class="t-info"><div class="t-title">Revise Binary Search</div><div class="t-meta">DSA · 30 mins</div></div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)">
+              <div class="chk"></div>
+              <div class="t-info"><div class="t-title">System Design: Design a URL Shortener</div><div class="t-meta">System Design · 60 mins</div></div>
+            </div>
+            <div class="task-item" onclick="toggleTask(this)">
+              <div class="chk"></div>
+              <div class="t-info"><div class="t-title">Mock Interview Practice</div><div class="t-meta">Behavioral · 30 mins</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Recent Activity</div>
+          <div class="activity-item">
+            <div class="ai-dot" style="background:var(--green)"></div>
+            <div class="a-text">Completed "Binary Trees" module</div>
+            <div class="a-time">2h ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="ai-dot" style="background:var(--primary)"></div>
+            <div class="a-text">Readiness score improved by 3%</div>
+            <div class="a-time">Yesterday</div>
+          </div>
+          <div class="activity-item">
+            <div class="ai-dot" style="background:var(--yellow)"></div>
+            <div class="a-text">Added Google to target companies</div>
+            <div class="a-time">2 days ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="ai-dot" style="background:var(--accent)"></div>
+            <div class="a-text">Solved 5 Graphs problems on LeetCode</div>
+            <div class="a-time">3 days ago</div>
+          </div>
+          <div class="activity-item">
+            <div class="ai-dot" style="background:var(--green)"></div>
+            <div class="a-text">Completed System Design notes</div>
+            <div class="a-time">4 days ago</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-20">
+        <div class="section-title">Company Match Overview</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div id="dash-companies"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== READINESS SCORE PAGE ===== -->
+    <div class="page" id="page-readiness">
+      <div class="page-header">
+        <h1>🎯 Readiness Score</h1>
+        <p>Your current placement readiness based on skills, practice & profile</p>
+      </div>
+      <div class="card">
+        <div class="score-ring-wrap">
+          <div class="ring-container">
+            <svg class="ring" width="160" height="160" viewBox="0 0 160 160">
+              <circle class="ring-bg" cx="80" cy="80" r="70"/>
+              <circle class="ring-fill" id="ring-fill" cx="80" cy="80" r="70"/>
+            </svg>
+            <div class="ring-text">
+              <div class="pct" id="score-pct">72%</div>
+              <div class="lbl">READY</div>
+            </div>
+          </div>
+          <div class="score-breakdown">
+            <div class="section-title">Score Breakdown</div>
+            <div class="score-item">
+              <div class="s-label"><span>DSA & Problem Solving</span><span style="color:var(--primary)">68%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:68%;background:#6c63ff"></div></div>
+            </div>
+            <div class="score-item">
+              <div class="s-label"><span>System Design</span><span style="color:var(--yellow)">45%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:45%;background:#f59e0b"></div></div>
+            </div>
+            <div class="score-item">
+              <div class="s-label"><span>Communication / HR</span><span style="color:var(--green)">82%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:82%;background:#22c55e"></div></div>
+            </div>
+            <div class="score-item">
+              <div class="s-label"><span>Resume & Profile</span><span style="color:var(--accent)">60%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:60%;background:#ff6584"></div></div>
+            </div>
+            <div class="score-item">
+              <div class="s-label"><span>Mock Interviews</span><span style="color:var(--primary)">78%</span></div>
+              <div class="bar-track"><div class="bar-fill" style="width:78%;background:#6c63ff"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3 mt-20">
+        <div class="stat-card">
+          <div class="label">LeetCode Solved</div>
+          <div class="value" style="color:var(--primary)">127</div>
+          <div class="sub">Easy: 64 · Med: 51 · Hard: 12</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Mock Interviews</div>
+          <div class="value" style="color:var(--green)">8</div>
+          <div class="sub">Avg rating: 7.2/10</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Study Streak</div>
+          <div class="value" style="color:var(--yellow)">🔥 14</div>
+          <div class="sub">days consecutive</div>
+        </div>
+      </div>
+
+      <div class="card mt-20">
+        <div class="section-title">AI Recommendations to Boost Score</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#fef9c3;border-radius:10px;">
+            <span style="font-size:20px">⚠️</span>
+            <div>
+              <div style="font-weight:600;font-size:14px">System Design is weakest area (45%)</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:2px">Start with "Designing URL Shortener" and "Design Twitter" — spend 1 hour daily for 2 weeks</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#dcfce7;border-radius:10px;">
+            <span style="font-size:20px">💡</span>
+            <div>
+              <div style="font-weight:600;font-size:14px">Solve 30 more Medium problems</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:2px">Focus on Graphs, DP, and Sliding Window — these are most frequent in FAANG interviews</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:#ede9fe;border-radius:10px;">
+            <span style="font-size:20px">📝</span>
+            <div>
+              <div style="font-weight:600;font-size:14px">Update your resume with projects</div>
+              <div style="font-size:13px;color:var(--muted);margin-top:2px">Add quantified achievements and ensure your GitHub has 3+ active projects</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DAILY PLAN PAGE ===== -->
+    <div class="page" id="page-plan">
+      <div class="page-header">
+        <h1>📅 Personalised Daily Plan</h1>
+        <p>AI-generated study plan based on your target companies and skill gaps</p>
+      </div>
+      <div class="plan-day" id="day-picker"></div>
+      <div class="card">
+        <div class="section-title" id="plan-date-title">Today's Plan — Monday, Oct 8</div>
+        <div class="task-list" id="task-list-full">
+          <div class="task-item done" onclick="toggleTask(this)">
+            <div class="chk">✓</div>
+            <div class="t-info"><div class="t-title">Morning: Solve 2 LeetCode Medium (Arrays)</div><div class="t-meta">⚡ DSA · 45 mins · High Priority</div></div>
+            <div class="t-time">7:00 AM</div>
+          </div>
+          <div class="task-item done" onclick="toggleTask(this)">
+            <div class="chk">✓</div>
+            <div class="t-info"><div class="t-title">Revise Binary Search concepts</div><div class="t-meta">📚 DSA · 30 mins</div></div>
+            <div class="t-time">8:00 AM</div>
+          </div>
+          <div class="task-item" onclick="toggleTask(this)">
+            <div class="chk"></div>
+            <div class="t-info"><div class="t-title">System Design: URL Shortener (deep dive)</div><div class="t-meta">🏗️ System Design · 60 mins · High Priority</div></div>
+            <div class="t-time">10:00 AM</div>
+          </div>
+          <div class="task-item" onclick="toggleTask(this)">
+            <div class="chk"></div>
+            <div class="t-info"><div class="t-title">Watch: Grokking System Design video</div><div class="t-meta">🎥 Learning · 30 mins</div></div>
+            <div class="t-time">2:00 PM</div>
+          </div>
+          <div class="task-item" onclick="toggleTask(this)">
+            <div class="chk"></div>
+            <div class="t-info"><div class="t-title">Mock Interview Practice — Behavioral</div><div class="t-meta">🎤 Communication · 30 mins</div></div>
+            <div class="t-time">4:00 PM</div>
+          </div>
+          <div class="task-item" onclick="toggleTask(this)">
+            <div class="chk"></div>
+            <div class="t-info"><div class="t-title">Solve 1 Hard LeetCode (DP)</div><div class="t-meta">⚡ DSA · 45 mins</div></div>
+            <div class="t-time">7:00 PM</div>
+          </div>
+          <div class="task-item" onclick="toggleTask(this)">
+            <div class="chk"></div>
+            <div class="t-info"><div class="t-title">Update LinkedIn & GitHub profile</div><div class="t-meta">👤 Profile · 20 mins</div></div>
+            <div class="t-time">9:00 PM</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SKILLS ASSESSMENT PAGE ===== -->
+    <div class="page" id="page-skills">
+      <div class="page-header">
+        <h1>⚡ Skills Assessment</h1>
+        <p>Detailed view of your skill levels and improvement areas</p>
+      </div>
+      <div class="skill-cat">
+        <h3>💻 Data Structures & Algorithms</h3>
+        <div class="skill-grid">
+          <div class="skill-box"><div class="sk-name"><span>Arrays & Strings</span><span class="badge badge-green">Strong</span></div><div class="bar-track"><div class="bar-fill" style="width:80%;background:#22c55e"></div></div><div class="sk-level">80% · Solved 35 problems</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Linked Lists</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:60%;background:#f59e0b"></div></div><div class="sk-level">60% · Solved 18 problems</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Trees & Graphs</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:55%;background:#f59e0b"></div></div><div class="sk-level">55% · Solved 22 problems</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Dynamic Programming</span><span class="badge badge-red">Weak</span></div><div class="bar-track"><div class="bar-fill" style="width:35%;background:#ef4444"></div></div><div class="sk-level">35% · Solved 8 problems</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Binary Search</span><span class="badge badge-green">Strong</span></div><div class="bar-track"><div class="bar-fill" style="width:75%;background:#22c55e"></div></div><div class="sk-level">75% · Solved 15 problems</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Heaps & Queues</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:50%;background:#f59e0b"></div></div><div class="sk-level">50% · Solved 10 problems</div></div>
+        </div>
+      </div>
+      <div class="skill-cat">
+        <h3>🏗️ System Design & Architecture</h3>
+        <div class="skill-grid">
+          <div class="skill-box"><div class="sk-name"><span>High Level Design</span><span class="badge badge-red">Weak</span></div><div class="bar-track"><div class="bar-fill" style="width:40%;background:#ef4444"></div></div><div class="sk-level">40% · 2 designs practiced</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Database Design</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:60%;background:#f59e0b"></div></div><div class="sk-level">60% · SQL proficient</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Scalability & Load Balancing</span><span class="badge badge-red">Weak</span></div><div class="bar-track"><div class="bar-fill" style="width:30%;background:#ef4444"></div></div><div class="sk-level">30% · Needs more practice</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Microservices</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:55%;background:#f59e0b"></div></div><div class="sk-level">55% · Basic understanding</div></div>
+        </div>
+      </div>
+      <div class="skill-cat">
+        <h3>🎤 Soft Skills & Communication</h3>
+        <div class="skill-grid">
+          <div class="skill-box"><div class="sk-name"><span>Communication</span><span class="badge badge-green">Strong</span></div><div class="bar-track"><div class="bar-fill" style="width:82%;background:#22c55e"></div></div><div class="sk-level">82% · Good verbal skills</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Problem Explanation</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:65%;background:#f59e0b"></div></div><div class="sk-level">65% · Improving</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Behavioral (STAR)</span><span class="badge badge-green">Strong</span></div><div class="bar-track"><div class="bar-fill" style="width:75%;background:#22c55e"></div></div><div class="sk-level">75% · 3 mock interviews done</div></div>
+          <div class="skill-box"><div class="sk-name"><span>Resume Quality</span><span class="badge badge-yellow">Medium</span></div><div class="bar-track"><div class="bar-fill" style="width:60%;background:#f59e0b"></div></div><div class="sk-level">60% · Needs project updates</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TARGET COMPANIES PAGE ===== -->
+    <div class="page" id="page-companies">
+      <div class="page-header">
+        <h1>🏢 Target Companies</h1>
+        <p>Track your match with dream companies and what you need to improve</p>
+      </div>
+      <div class="company-detail">
+        <div class="co-list" id="co-list"></div>
+        <div id="co-detail-area"></div>
+      </div>
+    </div>
+
+    <!-- ===== AI CHAT PAGE ===== -->
+    <div class="page" id="page-chat">
+      <div class="page-header">
+        <h1>🤖 AI Career Coach</h1>
+        <p>Ask me anything about placements, DSA, System Design, or your career path</p>
+      </div>
+      <div class="quick-chips">
+        <button class="qchip" onclick="quickAsk(this)">How to crack Google?</button>
+        <button class="qchip" onclick="quickAsk(this)">Best DSA resources</button>
+        <button class="qchip" onclick="quickAsk(this)">System Design roadmap</button>
+        <button class="qchip" onclick="quickAsk(this)">How to prepare resume?</button>
+        <button class="qchip" onclick="quickAsk(this)">Mock interview tips</button>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Ask your career question..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+          <button onclick="sendMsg()">Send ✈️</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== QUIZ PAGE ===== -->
+    <div class="page" id="page-quiz">
+      <div class="page-header">
+        <h1>📝 Quiz & Test</h1>
+        <p>Placement preparation ke liye MCQ questions — answer karo, score dekho!</p>
+      </div>
+
+      <!-- Score Summary Bar -->
+      <div class="quiz-header-bar">
+        <div class="quiz-score-bar">
+          <div class="qs-box qs-total">📋 Total: <span id="q-total">0</span></div>
+          <div class="qs-box qs-right">✅ Sahi: <span id="q-right">0</span></div>
+          <div class="qs-box qs-wrong">❌ Galat: <span id="q-wrong">0</span></div>
+          <div class="qs-box qs-score">🏆 Score: <span id="q-score">0</span>%</div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button onclick="resetQuiz()" style="padding:10px 16px;background:#f3f4f6;color:var(--text);border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">🔄 Reset</button>
+          <button onclick="showResult()" style="padding:10px 16px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">📊 Result</button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="quiz-tabs">
+        <div class="qtab active" onclick="switchQTab('attempt',this)">🎯 Quiz Attempt</div>
+        <div class="qtab" onclick="switchQTab('add',this)">➕ Question Add/Remove</div>
+        <div class="qtab" onclick="switchQTab('result',this)">📊 Result</div>
+      </div>
+
+      <!-- TAB 1: Quiz Questions -->
+      <div id="qtab-attempt">
+        <div id="quiz-questions-list"></div>
+      </div>
+
+      <!-- TAB 2: Add/Remove Questions -->
+      <div id="qtab-add" style="display:none;">
+        <div class="add-q-panel">
+          <h3>➕ Naya Question Add Karo</h3>
+          <div class="form-group">
+            <label>Question Text</label>
+            <textarea id="new-q-text" rows="2" style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;outline:none;resize:vertical;font-family:inherit;" placeholder="Yahan question likho..."></textarea>
+          </div>
+          <div class="opt-inputs">
+            <div class="opt-inp-wrap"><div class="opt-lbl">A</div><input id="new-opt-a" placeholder="Option A"/></div>
+            <div class="opt-inp-wrap"><div class="opt-lbl">B</div><input id="new-opt-b" placeholder="Option B"/></div>
+            <div class="opt-inp-wrap"><div class="opt-lbl">C</div><input id="new-opt-c" placeholder="Option C"/></div>
+            <div class="opt-inp-wrap"><div class="opt-lbl">D</div><input id="new-opt-d" placeholder="Option D"/></div>
+          </div>
+          <div class="form-group">
+            <label>Sahi Answer</label>
+            <select id="new-correct" style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;outline:none;">
+              <option value="0">A — Option A</option>
+              <option value="1">B — Option B</option>
+              <option value="2">C — Option C</option>
+              <option value="3">D — Option D</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Explanation (optional)</label>
+            <input id="new-explain" style="width:100%;padding:10px 14px;border:2px solid var(--border);border-radius:10px;font-size:14px;outline:none;" placeholder="Sahi answer ka reason..."/>
+          </div>
+          <button onclick="addQuestion()" style="padding:11px 24px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;width:100%;">➕ Question Add Karo</button>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div class="section-title">📋 Existing Questions (Delete kar sakte ho)</div>
+          <div id="manage-q-list"></div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Result -->
+      <div id="qtab-result" style="display:none;">
+        <div class="quiz-result-card">
+          <div class="big-score" id="result-pct">0%</div>
+          <div class="result-label" id="result-grade">Keep Trying! 💪</div>
+          <div class="result-sub" id="result-sub">Complete the quiz to see your result</div>
+          <div class="result-stats">
+            <div class="r-stat"><div class="rv" id="res-total">0</div><div class="rl">Total Questions</div></div>
+            <div class="r-stat"><div class="rv" id="res-right">0</div><div class="rl">✅ Sahi</div></div>
+            <div class="r-stat"><div class="rv" id="res-wrong">0</div><div class="rl">❌ Galat</div></div>
+          </div>
+        </div>
+        <div id="result-review"></div>
+      </div>
+
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+/* ========== STATE ========== */
+let studentData = { name: 'Arjun Sharma', branch: 'CSE', year: 'Final Year', companies: [] };
+
+/* ========== ONBOARDING ========== */
+let selectedCompanies = [];
+function goStep(n) {
+  [1,2,3].forEach(i => document.getElementById('step'+i).classList.add('ob-hidden'));
+  [1,2,3].forEach(i => document.getElementById('pb'+i).classList.remove('active'));
+  document.getElementById('step'+n).classList.remove('ob-hidden');
+  for(let i=1;i<=n;i++) document.getElementById('pb'+i).classList.add('active');
+}
+function toggleCompany(el, name, icon, color) {
+  el.classList.toggle('selected');
+  if(selectedCompanies.includes(name)) selectedCompanies = selectedCompanies.filter(c=>c!==name);
+  else selectedCompanies.push(name);
+}
+function launchApp() {
+  const fname = document.getElementById('fname').value || 'Arjun';
+  const lname = document.getElementById('lname').value || 'Sharma';
+  const branch = document.getElementById('branch').value || 'Computer Science';
+  const year = document.getElementById('year').value || 'Final Year';
+  studentData = { name: fname+' '+lname, branch, year, companies: selectedCompanies.length ? selectedCompanies : ['Google','Microsoft','Amazon'] };
+  
+  document.getElementById('sidebar-name').textContent = studentData.name;
+  document.getElementById('sidebar-role').textContent = (branch.split(' ')[0]||'CSE') + ' · ' + (year||'Final Year');
+  document.getElementById('sidebar-avatar').textContent = (fname[0]||'A')+(lname[0]||'S');
+  document.getElementById('welcome-name').textContent = 'Good morning, ' + fname + '! 👋';
+  document.getElementById('score-pct').textContent = '72%';
+
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  buildDayPicker();
+  buildCompanyList();
+  buildDashCompanies();
+  initChat();
+  animateRing();
+  renderQuizQuestions();
+}
+
+/* ========== NAVIGATION ========== */
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  if(id==='readiness') animateRing();
+}
+
+/* ========== READINESS RING ========== */
+function animateRing() {
+  const fill = document.getElementById('ring-fill');
+  if(!fill) return;
+  const score = 72;
+  const circumference = 2 * Math.PI * 70;
+  const offset = circumference - (score/100)*circumference;
+  fill.style.strokeDasharray = circumference;
+  fill.style.strokeDashoffset = circumference;
+  setTimeout(()=>{ fill.style.strokeDashoffset = offset; }, 100);
+}
+
+/* ========== TASKS ========== */
+function toggleTask(el) {
+  el.classList.toggle('done');
+  if(el.classList.contains('done')) el.querySelector('.chk').textContent = '✓';
+  else el.querySelector('.chk').textContent = '';
+}
+
+/* ========== DAY PICKER ========== */
+function buildDayPicker() {
+  const days = ['Mon','Tue','Wed','Thu','Fri'];
+  const dates = [6,7,8,9,10];
+  const tasks = [4,6,7,5,6];
+  const container = document.getElementById('day-picker');
+  container.innerHTML = '';
+  days.forEach((d,i)=>{
+    const card = document.createElement('div');
+    card.className = 'day-card' + (i===2?' today':'');
+    card.innerHTML = `<div class="d-name">${d}</div><div class="d-date">Oct ${dates[i]}</div><div class="d-tasks">${tasks[i]} tasks</div>`;
+    card.onclick = function(){
+      document.querySelectorAll('.day-card').forEach(c=>c.classList.remove('today'));
+      this.classList.add('today');
+      document.getElementById('plan-date-title').textContent = `${d}, Oct ${dates[i]} — ${tasks[i]} Tasks`;
+    };
+    container.appendChild(card);
+  });
+}
+
+/* ========== TARGET COMPANIES ========== */
+const companyDB = {
+  'Google': { color:'#4285f4', letter:'G', role:'Software Engineer', salary:'₹40–80 LPA', difficulty:'Very High',
+    match:65, openings:'200+', deadline:'Jan 2025',
+    requirements:['DSA Expert (LeetCode Hard)','System Design (Distributed Systems)','2+ strong projects','CGPA 7.5+','Strong communication'], },
+  'Microsoft': { color:'#00a4ef', letter:'M', role:'Software Engineer 2', salary:'₹30–60 LPA', difficulty:'High',
+    match:72, openings:'150+', deadline:'Dec 2024',
+    requirements:['DSA Medium-Hard level','OOPs & Design Patterns','Azure knowledge (bonus)','CGPA 7.0+','Leadership examples'], },
+  'Amazon': { color:'#ff9900', letter:'A', role:'SDE-1', salary:'₹25–55 LPA', difficulty:'High',
+    match:70, openings:'300+', deadline:'Nov 2024',
+    requirements:['14 Leadership Principles','DSA Medium level','System Design basics','CGPA 6.5+','Strong problem solving'], },
+  'Infosys': { color:'#7b2d8b', letter:'I', role:'System Engineer', salary:'₹3.6–6 LPA', difficulty:'Medium',
+    match:90, openings:'5000+', deadline:'Ongoing',
+    requirements:['Basic DSA','Any programming language','Aptitude test','CGPA 6.0+','Good communication'], },
+  'TCS': { color:'#0052cc', letter:'T', role:'Analyst', salary:'₹3.5–7 LPA', difficulty:'Medium',
+    match:92, openings:'10000+', deadline:'Ongoing',
+    requirements:['TCS NQT exam','Basic coding','Email writing skills','CGPA 6.0+','No active backlog'], },
+  'Flipkart': { color:'#f7a700', letter:'F', role:'SDE-1', salary:'₹20–45 LPA', difficulty:'High',
+    match:68, openings:'100+', deadline:'Jan 2025',
+    requirements:['DSA Medium-Hard','System Design basics','E-commerce domain interest','CGPA 7.0+','Team collaboration'], },
+};
+let activeCompany = null;
+function buildCompanyList() {
+  const companies = studentData.companies.length ? studentData.companies : Object.keys(companyDB);
+  const list = document.getElementById('co-list');
+  list.innerHTML = '';
+  companies.forEach((name,i)=>{
+    const db = companyDB[name] || companyDB['TCS'];
+    const card = document.createElement('div');
+    card.className = 'co-card' + (i===0?' active':'');
+    card.innerHTML = `<div class="clogo" style="background:${db.color}">${db.letter}</div><div><h4>${name}</h4><p>${db.role}</p></div>`;
+    card.onclick = function(){
+      document.querySelectorAll('.co-card').forEach(c=>c.classList.remove('active'));
+      this.classList.add('active');
+      showCompanyDetail(name);
+    };
+    list.appendChild(card);
+  });
+  showCompanyDetail(companies[0]);
+}
+function showCompanyDetail(name) {
+  const db = companyDB[name] || companyDB['TCS'];
+  const area = document.getElementById('co-detail-area');
+  const matchColor = db.match>=80?'#22c55e':db.match>=60?'#f59e0b':'#ef4444';
+  area.innerHTML = `
+    <div class="co-detail-card">
+      <div class="co-header">
+        <div class="big-logo" style="background:${db.color}">${db.letter}</div>
+        <div>
+          <h2>${name}</h2>
+          <p>${db.role} · ${db.salary}</p>
+          <span class="badge badge-${db.difficulty==='Very High'?'red':db.difficulty==='High'?'yellow':'blue'}">${db.difficulty} Difficulty</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-box"><div class="ib-label">Open Positions</div><div class="ib-val">${db.openings}</div></div>
+        <div class="info-box"><div class="ib-label">Package</div><div class="ib-val">${db.salary}</div></div>
+        <div class="info-box"><div class="ib-label">Deadline</div><div class="ib-val">${db.deadline}</div></div>
+      </div>
+      <div class="section-title">Requirements</div>
+      <ul class="req-list">${db.requirements.map(r=>`<li>${r}</li>`).join('')}</ul>
+      <div class="match-bar">
+        <div class="mb-label"><span>Your Match Score</span><span style="color:${matchColor};font-size:18px;font-weight:800">${db.match}%</span></div>
+        <div class="bar-track" style="height:12px"><div class="bar-fill" style="width:${db.match}%;background:${matchColor}"></div></div>
+        <div style="font-size:13px;color:var(--muted);margin-top:8px">${db.match>=80?'🟢 Great match! Keep going.':db.match>=60?'🟡 Good match. Improve System Design and DSA.':'🔴 Work on DSA fundamentals to improve match.'}</div>
+      </div>
+    </div>`;
+}
+function buildDashCompanies() {
+  const companies = studentData.companies.length ? studentData.companies.slice(0,3) : ['Google','Microsoft','Amazon'];
+  const el = document.getElementById('dash-companies');
+  el.innerHTML = companies.map(name => {
+    const db = companyDB[name] || companyDB['TCS'];
+    const matchColor = db.match>=80?'#22c55e':db.match>=60?'#f59e0b':'#ef4444';
+    return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+      <div style="width:36px;height:36px;border-radius:8px;background:${db.color};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px">${db.letter}</div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${name}</div>
+        <div class="bar-track" style="margin-top:4px"><div class="bar-fill" style="width:${db.match}%;background:${matchColor}"></div></div>
+      </div>
+      <div style="font-weight:700;color:${matchColor}">${db.match}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* ========== AI CHAT ========== */
+const botResponses = {
+  'google': `🔵 **To crack Google:**\n\n1. **DSA**: Solve 150+ LeetCode (focus on Hard)\n2. **System Design**: Practice 10+ designs (URL Shortener, Twitter, YouTube)\n3. **Behavioral**: Use STAR format\n4. **Timeline**: 3-6 months prep\n\n📌 Key tip: Google values problem-solving approach over just correct answers!`,
+  'dsa': `📚 **Best DSA Resources:**\n\n🔹 **Practice**: LeetCode, Codeforces, HackerRank\n🔹 **Books**: CTCI by Gayle McDowell, CLRS\n🔹 **YouTube**: Abdul Bari, Striver's A2Z DSA\n🔹 **Free Course**: CS50 (Harvard)\n\n💡 Solve problems in this order: Arrays → Strings → Linked Lists → Trees → Graphs → DP`,
+  'system design': `🏗️ **System Design Roadmap:**\n\nWeek 1-2: Basics (Load Balancer, CDN, Caching)\nWeek 3-4: Databases (SQL vs NoSQL, Sharding)\nWeek 5-6: Distributed Systems\nWeek 7-8: Practice Designs\n\n📖 Resources: Grokking SD, System Design Primer (GitHub), ByteByteGo`,
+  'resume': `📝 **Resume Tips for Placements:**\n\n✅ 1 page only (for freshers)\n✅ Add STAR-format bullet points\n✅ Include GitHub links with active projects\n✅ Quantify achievements ("Improved performance by 40%")\n✅ ATS-friendly format (no tables/graphics)\n\n🛑 Avoid: Generic summaries, spelling errors, fake skills`,
+  'mock interview': `🎤 **Mock Interview Tips:**\n\n1. Think aloud while solving\n2. Clarify requirements before coding\n3. Write brute force first, then optimize\n4. Practice on Pramp, InterviewBit\n5. Record yourself and review\n\n⏰ Practice daily 30-min sessions!`,
+  'default': `🤖 Great question! Based on your profile targeting **${studentData.companies.join(', ')}**, here's my advice:\n\n📊 Your current readiness is **72%**. Focus on:\n1. System Design (biggest gap)\n2. Dynamic Programming\n3. Mock interviews\n\nWant me to create a specific study plan? Just ask! 💪`
+};
+
+function initChat() {
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  addBotMsg(`👋 Hi **${studentData.name.split(' ')[0]}**! I'm your AI Career Coach.\n\nYou're targeting **${studentData.companies.slice(0,2).join(' and ')}** — great choices! Your readiness is at **72%**.\n\nAsk me anything about DSA, System Design, interview tips, or your preparation strategy! 🚀`);
+}
+function addBotMsg(text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.innerHTML = `<div class="av">🤖</div><div class="bubble">${text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function addUserMsg(text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="av">👤</div><div class="bubble">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'typing-msg';
+  div.innerHTML = `<div class="av">🤖</div><div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+function removeTyping() { const t = document.getElementById('typing-msg'); if(t) t.remove(); }
+function getBotReply(msg) {
+  const lower = msg.toLowerCase();
+  if(lower.includes('google') || lower.includes('faang')) return botResponses['google'];
+  if(lower.includes('dsa') || lower.includes('data structure') || lower.includes('algorithm') || lower.includes('leetcode')) return botResponses['dsa'];
+  if(lower.includes('system design') || lower.includes('design')) return botResponses['system design'];
+  if(lower.includes('resume') || lower.includes('cv')) return botResponses['resume'];
+  if(lower.includes('mock') || lower.includes('interview')) return botResponses['mock interview'];
+  return botResponses['default'];
+}
+function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  addUserMsg(text);
+  input.value = '';
+  showTyping();
+  setTimeout(()=>{ removeTyping(); addBotMsg(getBotReply(text)); }, 1200);
+}
+function quickAsk(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendMsg();
+}
+
+/* ========== QUIZ SYSTEM ========== */
+let quizQuestions = [
+  { q:"Time complexity of Binary Search?", opts:["O(n)","O(log n)","O(n²)","O(1)"], correct:1, explain:"Binary Search divides array in half each step → O(log n)" },
+  { q:"Which data structure is used in BFS traversal?", opts:["Stack","Tree","Queue","Heap"], correct:2, explain:"BFS uses Queue (FIFO) to visit nodes level by level" },
+  { q:"What does OOP stand for?", opts:["Object Oriented Programming","Open Object Processing","Ordered Output Protocol","None of these"], correct:0, explain:"OOP = Object Oriented Programming — Java, C++ use this paradigm" },
+  { q:"Which sorting algorithm has best average-case O(n log n)?", opts:["Bubble Sort","Insertion Sort","Merge Sort","Selection Sort"], correct:2, explain:"Merge Sort always runs in O(n log n) — divide and conquer approach" },
+  { q:"SQL command to fetch all records from a table?", opts:["GET * FROM table","SELECT * FROM table","FETCH ALL table","SHOW * table"], correct:1, explain:"SELECT * FROM table_name is standard SQL to retrieve all rows" },
+  { q:"In system design, CDN stands for?", opts:["Central Data Node","Content Delivery Network","Core Database Network","Cloud DNS Node"], correct:1, explain:"CDN = Content Delivery Network — serves content from nearest server" },
+  { q:"SOLID — 'S' stands for?", opts:["Open/Closed","Single Responsibility","Liskov Substitution","Interface Segregation"], correct:1, explain:"Single Responsibility Principle (SRP) — one class = one job" },
+  { q:"Output of: print(type([]))?", opts:["<class 'tuple'>","<class 'dict'>","<class 'list'>","<class 'set'>"], correct:2, explain:"[] is a list literal in Python → type is <class 'list'>" },
+  { q:"In Amazon interviews, LP stands for?", opts:["Low Priority","Leadership Principles","Loop Protocol","Logical Problem"], correct:1, explain:"Amazon's 16 Leadership Principles are core to their interview process" },
+  { q:"Which HTTP method is used to UPDATE a resource in REST API?", opts:["GET","POST","PUT","DELETE"], correct:2, explain:"PUT (or PATCH) is used to update an existing resource in REST" }
+];
+let quizAnswers = {};
+
+function renderQuizQuestions() {
+  const list = document.getElementById('quiz-questions-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  quizQuestions.forEach((q, i) => {
+    const answered = quizAnswers.hasOwnProperty(i);
+    const sel = quizAnswers[i];
+    const isCorrect = sel === q.correct;
+    const optsHTML = q.opts.map((opt, oi) => {
+      let cls = 'opt-btn';
+      if (answered) {
+        if (oi === q.correct) cls += ' correct';
+        else if (oi === sel && !isCorrect) cls += ' wrong';
+      }
+      return `<button class="${cls}" onclick="answerQ(${i},${oi})" ${answered?'disabled':''}><span class="opt-letter">${letters[oi]}</span>${opt}</button>`;
+    }).join('');
+    const fbCls = answered ? (isCorrect ? 'q-feedback correct-fb show' : 'q-feedback wrong-fb show') : 'q-feedback';
+    const fbText = answered ? (isCorrect ? `✅ Sahi! ${q.explain}` : `❌ Galat! Sahi: ${letters[q.correct]}. ${q.explain}`) : '';
+    list.innerHTML += `<div class="quiz-card" id="qcard-${i}">
+      <div class="q-num">Question ${i+1} of ${quizQuestions.length}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options-grid">${optsHTML}</div>
+      <div class="${fbCls}">${fbText}</div>
+    </div>`;
+  });
+  updateScoreBar();
+}
+
+function answerQ(qIdx, optIdx) {
+  if (quizAnswers.hasOwnProperty(qIdx)) return;
+  quizAnswers[qIdx] = optIdx;
+  renderQuizQuestions();
+}
+
+function updateScoreBar() {
+  const total = quizQuestions.length;
+  const right = Object.entries(quizAnswers).filter(([i,a]) => quizQuestions[i]?.correct === a).length;
+  const attempted = Object.keys(quizAnswers).length;
+  const wrong = attempted - right;
+  const score = total > 0 ? Math.round((right/total)*100) : 0;
+  document.getElementById('q-total').textContent = total;
+  document.getElementById('q-right').textContent = right;
+  document.getElementById('q-wrong').textContent = wrong;
+  document.getElementById('q-score').textContent = score;
+}
+
+function resetQuiz() {
+  if (!confirm('Quiz reset karna chahte ho? Sare answers clear ho jayenge!')) return;
+  quizAnswers = {};
+  renderQuizQuestions();
+}
+
+function switchQTab(tab, el) {
+  ['attempt','add','result'].forEach(t => { document.getElementById('qtab-'+t).style.display = t===tab?'block':'none'; });
+  document.querySelectorAll('.qtab').forEach(e => e.classList.remove('active'));
+  if(el) el.classList.add('active');
+  if(tab==='result') buildResult();
+  if(tab==='add') renderManageList();
+}
+
+function showResult() {
+  switchQTab('result', null);
+  document.querySelectorAll('.qtab').forEach((e,i)=>{ if(i===2) e.classList.add('active'); else e.classList.remove('active'); });
+}
+
+function buildResult() {
+  const total = quizQuestions.length;
+  const attempted = Object.keys(quizAnswers).length;
+  const right = Object.entries(quizAnswers).filter(([i,a]) => quizQuestions[i]?.correct === a).length;
+  const wrong = attempted - right;
+  const score = total > 0 ? Math.round((right/total)*100) : 0;
+  document.getElementById('result-pct').textContent = score+'%';
+  document.getElementById('res-total').textContent = total;
+  document.getElementById('res-right').textContent = right;
+  document.getElementById('res-wrong').textContent = wrong;
+  const grade = score>=80?'🌟 Excellent! Placement Ready!':score>=60?'👍 Accha! Thodi aur practice karo':score>=40?'💪 Average. Focus karo!':'😅 Keep Trying! Revise karo';
+  const sub = attempted<total ? `(${total-attempted} questions attempt nahi kiye)` : `Sabhi ${total} questions attempt kiye! 🎉`;
+  document.getElementById('result-grade').textContent = grade;
+  document.getElementById('result-sub').textContent = sub;
+  const letters = ['A','B','C','D'];
+  const rev = document.getElementById('result-review');
+  rev.innerHTML = '<div class="section-title" style="margin-top:4px">📋 Answer Review</div>' +
+    quizQuestions.map((q,i) => {
+      const sel = quizAnswers[i];
+      const notA = !quizAnswers.hasOwnProperty(i);
+      const isC = sel === q.correct;
+      const bg = notA?'#f3f4f6':isC?'#dcfce7':'#fee2e2';
+      const icon = notA?'⏭️':isC?'✅':'❌';
+      return `<div style="background:${bg};border-radius:12px;padding:14px 16px;margin-bottom:10px;">
+        <div style="font-weight:600;font-size:14px;margin-bottom:6px">${icon} Q${i+1}: ${q.q}</div>
+        <div style="font-size:13px;color:#374151">
+          Tumhara answer: <strong>${notA?'Attempt nahi kiya':letters[sel]+'. '+q.opts[sel]}</strong><br>
+          Sahi answer: <strong style="color:#16a34a">${letters[q.correct]}. ${q.opts[q.correct]}</strong><br>
+          <span style="color:#6b7280;font-size:12px">💡 ${q.explain}</span>
+        </div>
+      </div>`;
+    }).join('');
+}
+
+function addQuestion() {
+  const qText = document.getElementById('new-q-text').value.trim();
+  const a = document.getElementById('new-opt-a').value.trim();
+  const b = document.getElementById('new-opt-b').value.trim();
+  const c = document.getElementById('new-opt-c').value.trim();
+  const d = document.getElementById('new-opt-d').value.trim();
+  const correct = parseInt(document.getElementById('new-correct').value);
+  const explain = document.getElementById('new-explain').value.trim();
+  if (!qText||!a||!b||!c||!d) { alert('Sare fields bharo!'); return; }
+  quizQuestions.push({ q:qText, opts:[a,b,c,d], correct, explain: explain||'Correct answer as selected.' });
+  ['new-q-text','new-opt-a','new-opt-b','new-opt-c','new-opt-d','new-explain'].forEach(id=>document.getElementById(id).value='');
+  renderManageList();
+  updateScoreBar();
+  alert('✅ Question add ho gaya!');
+}
+
+function removeQuestion(idx) {
+  if (!confirm('Ye question delete karna chahte ho?')) return;
+  quizQuestions.splice(idx,1);
+  const newAns = {};
+  Object.entries(quizAnswers).forEach(([k,v]) => { const ki=parseInt(k); if(ki<idx) newAns[ki]=v; else if(ki>idx) newAns[ki-1]=v; });
+  quizAnswers = newAns;
+  renderQuizQuestions();
+  renderManageList();
+}
+
+function renderManageList() {
+  const el = document.getElementById('manage-q-list');
+  if (!el) return;
+  const letters = ['A','B','C','D'];
+  el.innerHTML = quizQuestions.map((q,i) => `
+    <div style="background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px;margin-bottom:4px">Q${i+1}: ${q.q}</div>
+        <div style="font-size:12px;color:var(--muted)">${q.opts.map((o,oi)=>`<span style="${oi===q.correct?'color:#16a34a;font-weight:700':''}">${letters[oi]}. ${o}</span>`).join(' · ')}</div>
+      </div>
+      <button onclick="removeQuestion(${i})" style="padding:6px 12px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;">🗑️ Hatao</button>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
